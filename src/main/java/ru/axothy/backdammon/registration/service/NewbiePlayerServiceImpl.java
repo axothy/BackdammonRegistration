@@ -29,7 +29,8 @@ public class NewbiePlayerServiceImpl implements NewbiePlayerService {
         if (isNicknameAlreadyUsed(newNickname) == true) return NICKNAME_ALREADY_USED;
         if (isPhoneNumberAlreadyUsed(newPhoneNumber) == true) return PHONE_NUMBER_ALREADY_USED;
 
-        smsService.sendSMS(newPhoneNumber, newNickname);
+        int code = smsService.sendSMS(newPhoneNumber, newNickname);
+        saveCodeToCash(newNickname, code);
         return SMS_SENT_SUCCESSFULL;
     }
 
