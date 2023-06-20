@@ -34,13 +34,11 @@ public class NewbiePlayerServiceImpl implements NewbiePlayerService {
         return SMS_SENT_SUCCESSFULL;
     }
 
-    @Override
-    public void saveCodeToCash(String nickname, int code) {
+    private void saveCodeToCash(String nickname, int code) {
 
     }
 
-    @Override
-    public void deleteCodeFromCash(String nickname) {
+    private void deleteCodeFromCash(String nickname) {
 
     }
 
