@@ -22,4 +22,13 @@ public class PlayerRegisterController {
         return ResponseEntity.ok("x");
     }
 
+    @PostMapping(value = "/create")
+    public ResponseEntity<String> createPlayerAfterVerifying(@RequestParam String nickname, @RequestParam String phoneNumber,
+                                                             @RequestParam String password, @RequestParam int code) {
+        newbiePlayerService.registerNewPlayer(nickname, password, phoneNumber, code);
+
+        return ResponseEntity.ok("Вы успешно зарегистрированы!");
+    }
+
+
 }

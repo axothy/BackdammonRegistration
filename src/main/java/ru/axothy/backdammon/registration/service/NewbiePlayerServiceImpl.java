@@ -1,15 +1,20 @@
 package ru.axothy.backdammon.registration.service;
 
 import org.keycloak.admin.client.Keycloak;
-import org.keycloak.admin.client.KeycloakBuilder;
+import org.keycloak.admin.client.resource.UserResource;
+import org.keycloak.admin.client.resource.UsersResource;
+import org.keycloak.representations.idm.CredentialRepresentation;
+import org.keycloak.representations.idm.UserRepresentation;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 import ru.axothy.backdammon.registration.model.Player;
 
+import java.sql.SQLOutput;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -60,7 +65,8 @@ public class NewbiePlayerServiceImpl implements NewbiePlayerService {
 
     @Override
     public void registerNewPlayer(String nickname, String password, String phoneNumber, int code) {
-        createNewbie(nickname, phoneNumber);
+        //createNewbie(nickname, phoneNumber);
+        createKeycloakUser(nickname, password);
     }
 
     private void createNewbie(String nickname, String phoneNumber) {
@@ -77,6 +83,21 @@ public class NewbiePlayerServiceImpl implements NewbiePlayerService {
     }
 
     private void createKeycloakUser(String username, String password) {
+        CredentialRepresentation credential = new CredentialRepresentation();
+        credential.setTemporary(false);
+        credential.setType(CredentialRepresentation.PASSWORD);
+        credential.setValue(password);
+
+        UserRepresentation user = new UserRepresentation();
+        user.setCredentials(Collections.singletonList(credential));
+        user.setUsername(username);
+        user.setEnabled(true);
+        user.setEmailVerified(true);
+        user.setRealmRoles(Arrays.asList("player"));
+
+        var respone = keycloak.realm("backdammon-realm").users().create(user);
+        System.out.println(respone.getStatus());
+        System.out.println(respone.getMetadata());
 
     }
 

@@ -26,15 +26,16 @@ public class KeycloakConfig {
     @Value("${admin.credentials.password}")
     private String keycloakAdminPassword;
 
-    @Bean
+    @Bean(name = "keycloakMaster")
     public Keycloak getKeycloak() {
         return KeycloakBuilder.builder().serverUrl(keycloakUrl)
                 .grantType("password")
-                .realm(keycloakRealm)
+                .realm("master")
                 .clientId(keycloakResource)
                 .clientSecret(keycloakCredentialsSecret)
                 .username(keycloakAdminUsername)
                 .password(keycloakAdminPassword)
                 .build();
     }
+
 }
