@@ -16,24 +16,6 @@ import java.util.regex.Pattern;
 @Service
 public class NewbiePlayerServiceImpl implements NewbiePlayerService {
 
-    @Value("${keycloak.resource}")
-    private String keycloakResource;
-
-    @Value("${keycloak.credentials.secret}")
-    private String keycloakCredentialsSecret;
-
-    @Value("${admin.credentials.username}")
-    private String keycloakAdminUsername;
-
-    @Value("${admin.credentials.password}")
-    private String keycloakAdminPassword;
-
-    @Value("${keycloak.realm}")
-    private String keycloakRealm;
-
-    @Value("${keycloak.auth-server-url}")
-    private String keycloakUrl;
-
 
     private static final String NICKNAME_ALREADY_USED = "Данный никнейм уже зарегистрирован";
     private static final String PHONE_NUMBER_ALREADY_USED = "Данный номер телефона уже зарегистрирован";
@@ -46,6 +28,9 @@ public class NewbiePlayerServiceImpl implements NewbiePlayerService {
 
     @Autowired
     private RestTemplate restTemplate;
+
+    @Autowired
+    private Keycloak keycloak;
 
     @Override
     public String sendSmsForNewbiePlayer(String newNickname, String newPhoneNumber) {
@@ -69,12 +54,29 @@ public class NewbiePlayerServiceImpl implements NewbiePlayerService {
     }
 
     @Override
-    public String verifyCode(String nickname, int code) {
+    public String verifyCode(String phoneNumber, int code) {
         return null;
     }
 
     @Override
     public void registerNewPlayer(String nickname, String password, String phoneNumber, int code) {
+        createNewbie(nickname, phoneNumber);
+    }
+
+    private void createNewbie(String nickname, String phoneNumber) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBearerAuth(getAdminToken());
+        headers.setContentType(MediaType.APPLICATION_JSON);
+
+        UriComponentsBuilder builder = UriComponentsBuilder.fromUriString("http://localhost:8081/admin/players/newbie")
+                .queryParam("nickname", nickname)
+                .queryParam("phone", phoneNumber);
+        HttpEntity request = new HttpEntity(headers);
+
+        restTemplate.exchange(builder.toUriString(), HttpMethod.POST, request, Player.class).getBody();
+    }
+
+    private void createKeycloakUser(String username, String password) {
 
     }
 
@@ -129,17 +131,7 @@ public class NewbiePlayerServiceImpl implements NewbiePlayerService {
     }
 
     private String getAdminToken() {
-        Keycloak keycloak = KeycloakBuilder.builder().serverUrl(keycloakUrl)
-                .grantType("password")
-                .realm(keycloakRealm)
-                .clientId(keycloakResource)
-                .clientSecret(keycloakCredentialsSecret)
-                .username(keycloakAdminUsername)
-                .password(keycloakAdminPassword)
-                .build();
-
         return keycloak.tokenManager().getAccessTokenString();
     }
-
 
 }

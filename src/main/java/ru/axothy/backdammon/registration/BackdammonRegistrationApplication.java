@@ -1,5 +1,6 @@
 package ru.axothy.backdammon.registration;
 
+import org.keycloak.admin.client.KeycloakBuilder;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.web.client.RestTemplateBuilder;
@@ -22,5 +23,6 @@ public class BackdammonRegistrationApplication {
 	public RestTemplate getRestTemplate() {
 		return new RestTemplate();
 	}
+
 }
 
