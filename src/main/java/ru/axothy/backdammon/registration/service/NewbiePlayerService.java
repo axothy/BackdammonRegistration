@@ -6,5 +6,5 @@ import java.util.regex.Pattern;
 public interface NewbiePlayerService {
     String sendSmsForNewbiePlayer(String newNickname, String newPhoneNumber);
     String verifyCode(String nickname, int code);
-
+    void registerNewPlayer(String nickname, String password, String phoneNumber, int code);
 }

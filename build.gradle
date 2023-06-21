@@ -26,8 +26,8 @@ ext {
 }
 
 dependencies {
-	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+	//implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+	//implementation 'org.springframework.boot:spring-boot-starter-data-redis'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	implementation 'org.springframework.cloud:spring-cloud-starter-config'
 	compileOnly 'org.projectlombok:lombok'
@@ -39,6 +39,14 @@ dependencies {
 	implementation group: 'org.springframework.cloud', name: 'spring-cloud-starter-bootstrap', version: '3.1.6'
 	annotationProcessor "org.springframework.boot:spring-boot-configuration-processor"
 	implementation group: 'org.springframework.cloud', name: 'spring-cloud-starter-netflix-eureka-client', version: '3.1.6'
+
+	implementation group: 'org.keycloak', name: 'keycloak-admin-client', version: '21.1.1'
+
+	implementation group: 'org.glassfish.jersey.containers', name: 'jersey-container-servlet-core', version: '3.1.2'
+	implementation group: 'org.glassfish.jersey.core', name: 'jersey-server', version: '3.1.2'
+
+
+
 
 }
 

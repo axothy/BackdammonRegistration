@@ -6,7 +6,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-@ConfigurationProperties("player-service")
+@ConfigurationProperties("player-reg-service")
 @Getter
 @Setter
 public class ServiceConfig {
