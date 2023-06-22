@@ -1,18 +1,19 @@
 package ru.axothy.backdammon.registration.service;
 
 import org.keycloak.admin.client.Keycloak;
-import org.keycloak.admin.client.resource.UserResource;
-import org.keycloak.admin.client.resource.UsersResource;
+import org.keycloak.admin.client.KeycloakBuilder;
 import org.keycloak.representations.idm.CredentialRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
+import ru.axothy.backdammon.registration.model.Newbie;
 import ru.axothy.backdammon.registration.model.Player;
+import ru.axothy.backdammon.registration.repos.NewbieRepository;
 
-import java.sql.SQLOutput;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.regex.Matcher;
@@ -20,7 +21,23 @@ import java.util.regex.Pattern;
 
 @Service
 public class NewbiePlayerServiceImpl implements NewbiePlayerService {
+    @Value("${keycloak.resource}")
+    private String keycloakResource;
 
+    @Value("${keycloak.credentials.secret.realm}")
+    private String keycloakCredentialsSecret;
+
+    @Value("${keycloak.realm}")
+    private String realm;
+
+    @Value("${keycloak.auth-server-url}")
+    private String keycloakUrl;
+
+    @Value("${admin.credentials.username}")
+    private String keycloakAdminUsername;
+
+    @Value("${admin.credentials.password}")
+    private String keycloakAdminPassword;
 
     private static final String NICKNAME_ALREADY_USED = "Данный никнейм уже зарегистрирован";
     private static final String PHONE_NUMBER_ALREADY_USED = "Данный номер телефона уже зарегистрирован";
@@ -37,6 +54,9 @@ public class NewbiePlayerServiceImpl implements NewbiePlayerService {
     @Autowired
     private Keycloak keycloak;
 
+    @Autowired
+    private NewbieRepository newbieRepository;
+
     @Override
     public String sendSmsForNewbiePlayer(String newNickname, String newPhoneNumber) {
         if (isNicknameValid(newNickname) != true) return INVALID_NICKNAME;
@@ -46,26 +66,28 @@ public class NewbiePlayerServiceImpl implements NewbiePlayerService {
         if (isPhoneNumberAlreadyUsed(newPhoneNumber) == true) return PHONE_NUMBER_ALREADY_USED;
 
         int code = smsService.sendSMS(newPhoneNumber, newNickname);
-        saveCodeToCash(newNickname, code);
+        saveCodeToCash(newPhoneNumber, code);
         return SMS_SENT_SUCCESSFULL;
     }
 
-    private void saveCodeToCash(String nickname, int code) {
-
-    }
-
-    private void deleteCodeFromCash(String nickname) {
-
+    private void saveCodeToCash(String phoneNumber, int code) {
+        Newbie newbie = new Newbie();
+        newbie.setId(phoneNumber);
+        newbie.setCode(code);
+        newbie.setExpirationInSeconds(600L);
+        newbieRepository.save(newbie);
     }
 
     @Override
-    public String verifyCode(String phoneNumber, int code) {
-        return null;
+    public boolean verifyCode(String phoneNumber, int code) {
+        if (code != newbieRepository.findById(phoneNumber).get().getCode()) return false;
+        return true;
     }
 
     @Override
     public void registerNewPlayer(String nickname, String password, String phoneNumber, int code) {
-        //createNewbie(nickname, phoneNumber);
+        if (code != newbieRepository.findById(phoneNumber).get().getCode()) return;
+        createNewbie(nickname, phoneNumber);
         createKeycloakUser(nickname, password);
     }
 
@@ -152,6 +174,14 @@ public class NewbiePlayerServiceImpl implements NewbiePlayerService {
     }
 
     private String getAdminToken() {
+        Keycloak keycloak = KeycloakBuilder.builder().serverUrl(keycloakUrl)
+                .grantType("password")
+                .realm(realm)
+                .clientId(keycloakResource)
+                .clientSecret(keycloakCredentialsSecret)
+                .username(keycloakAdminUsername)
+                .password(keycloakAdminPassword)
+                .build();
         return keycloak.tokenManager().getAccessTokenString();
     }
 

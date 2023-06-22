@@ -18,8 +18,8 @@ public class PlayerRegisterController {
     }
 
     @GetMapping(value = "/verifycode")
-    public ResponseEntity<String> verifyCode(@RequestParam("nickname") String nickname, @RequestParam("code") int code) {
-        return ResponseEntity.ok("x");
+    public ResponseEntity<Boolean> verifyCode(@RequestParam("phoneNumber") String phoneNumber, @RequestParam("code") int code) {
+        return ResponseEntity.ok(newbiePlayerService.verifyCode(phoneNumber, code));
     }
 
     @PostMapping(value = "/create")

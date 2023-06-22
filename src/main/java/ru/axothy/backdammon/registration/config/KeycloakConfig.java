@@ -14,9 +14,6 @@ public class KeycloakConfig {
     @Value("${keycloak.credentials.secret}")
     private String keycloakCredentialsSecret;
 
-    @Value("${keycloak.realm}")
-    private String keycloakRealm;
-
     @Value("${keycloak.auth-server-url}")
     private String keycloakUrl;
 
@@ -26,7 +23,7 @@ public class KeycloakConfig {
     @Value("${admin.credentials.password}")
     private String keycloakAdminPassword;
 
-    @Bean(name = "keycloakMaster")
+    @Bean
     public Keycloak getKeycloak() {
         return KeycloakBuilder.builder().serverUrl(keycloakUrl)
                 .grantType("password")
