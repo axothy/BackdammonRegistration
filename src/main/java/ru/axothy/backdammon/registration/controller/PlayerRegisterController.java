@@ -18,14 +18,19 @@ public class PlayerRegisterController {
     }
 
     @GetMapping(value = "/verifycode")
-    public ResponseEntity<Boolean> verifyCode(@RequestParam("phoneNumber") String phoneNumber, @RequestParam("code") int code) {
-        return ResponseEntity.ok(newbiePlayerService.verifyCode(phoneNumber, code));
+    public ResponseEntity<String> verifyCode(@RequestParam("phoneNumber") String phoneNumber, @RequestParam("code") int code) {
+        boolean isVerified = newbiePlayerService.verifyCode(phoneNumber, code);
+
+        if (!isVerified) return ResponseEntity.badRequest().body("Неверный код");
+
+        return ResponseEntity.ok("Код верный");
     }
 
     @PostMapping(value = "/create")
     public ResponseEntity<String> createPlayerAfterVerifying(@RequestParam String nickname, @RequestParam String phoneNumber,
                                                              @RequestParam String password, @RequestParam int code) {
-        newbiePlayerService.registerNewPlayer(nickname, password, phoneNumber, code);
+        boolean isRegistered = newbiePlayerService.registerNewPlayer(nickname, password, phoneNumber, code);
+        if (!isRegistered) return ResponseEntity.badRequest().body("Что-то пошло не так. Попробуйте снова");
 
         return ResponseEntity.ok("Вы успешно зарегистрированы!");
     }

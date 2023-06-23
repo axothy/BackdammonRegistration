@@ -44,6 +44,7 @@ public class NewbiePlayerServiceImpl implements NewbiePlayerService {
     private static final String INVALID_NICKNAME = "Введите корректный никнейм (только латиница, 3-16 символов, без знаков)";
     private static final String INVALID_PHONE_NUMBER = "Введите корректный номер телефона";
     private static final String SMS_SENT_SUCCESSFULL = "СМС с кодом был отправлен на ваш номер";
+    private static final String SMS_ALREADY_SENT = "СМС с кодом уже был отправлен";
 
     @Autowired
     private SMSService smsService;
@@ -65,6 +66,11 @@ public class NewbiePlayerServiceImpl implements NewbiePlayerService {
         if (isNicknameAlreadyUsed(newNickname) == true) return NICKNAME_ALREADY_USED;
         if (isPhoneNumberAlreadyUsed(newPhoneNumber) == true) return PHONE_NUMBER_ALREADY_USED;
 
+        if (newbieRepository.existsById(newPhoneNumber)) {
+            Newbie newbie = newbieRepository.findById(newPhoneNumber).get();
+            if (newbie.getExpirationInSeconds() < 60L) return SMS_ALREADY_SENT;
+        }
+
         int code = smsService.sendSMS(newPhoneNumber, newNickname);
         saveCodeToCash(newPhoneNumber, code);
         return SMS_SENT_SUCCESSFULL;
@@ -74,21 +80,29 @@ public class NewbiePlayerServiceImpl implements NewbiePlayerService {
         Newbie newbie = new Newbie();
         newbie.setId(phoneNumber);
         newbie.setCode(code);
-        newbie.setExpirationInSeconds(600L);
+        newbie.setExpirationInSeconds(60L);
         newbieRepository.save(newbie);
     }
 
     @Override
     public boolean verifyCode(String phoneNumber, int code) {
-        if (code != newbieRepository.findById(phoneNumber).get().getCode()) return false;
-        return true;
+        Newbie newbie = newbieRepository.findById(phoneNumber).get();
+        if (code == newbie.getCode()) return true;
+        else {
+            newbie.setExpirationInSeconds(600L);
+            newbieRepository.save(newbie);
+            return false;
+        }
     }
 
     @Override
-    public void registerNewPlayer(String nickname, String password, String phoneNumber, int code) {
-        if (code != newbieRepository.findById(phoneNumber).get().getCode()) return;
-        createNewbie(nickname, phoneNumber);
-        createKeycloakUser(nickname, password);
+    public boolean registerNewPlayer(String nickname, String password, String phoneNumber, int code) {
+        if (code != newbieRepository.findById(phoneNumber).get().getCode()) return false;
+        else {
+            createNewbie(nickname, phoneNumber);
+            createKeycloakUser(nickname, password);
+            return true;
+        }
     }
 
     private void createNewbie(String nickname, String phoneNumber) {
