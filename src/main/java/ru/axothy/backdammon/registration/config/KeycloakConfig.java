@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.KeycloakBuilder;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -15,9 +16,11 @@ import org.springframework.context.annotation.Configuration;
 public class KeycloakConfig {
     private String resource;
     private String authServerUrl;
+
+    @Value("${keycloak.credentials.secret}")
     private String credentialsSecret;
+
     private String realm;
-    private String credentialsSecretRealm;
     private AdminCredentials adminCredentials;
 
 

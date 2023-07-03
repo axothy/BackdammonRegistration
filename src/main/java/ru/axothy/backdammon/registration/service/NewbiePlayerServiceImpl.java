@@ -27,7 +27,9 @@ public class NewbiePlayerServiceImpl implements NewbiePlayerService {
     private static final String INVALID_NICKNAME = "Введите корректный никнейм (только латиница, 3-16 символов, без знаков)";
     private static final String INVALID_PHONE_NUMBER = "Введите корректный номер телефона";
     private static final String SMS_SENT_SUCCESSFULL = "СМС с кодом был отправлен на ваш номер";
-    private static final String SMS_ALREADY_SENT = "СМС с кодом уже был отправлен";
+    private static final String SMS_ALREADY_SENT = "СМС с кодом уже был отправлен. Попробуйте через минуту";
+
+    private static final long CODE_EXPIRATION = 60L;
 
     @Autowired
     private KeycloakConfig keycloakConfig;
@@ -57,7 +59,7 @@ public class NewbiePlayerServiceImpl implements NewbiePlayerService {
 
         if (newbieRepository.existsById(newPhoneNumber)) {
             Newbie newbie = newbieRepository.findById(newPhoneNumber).get();
-            if (newbie.getExpirationInSeconds() < 60L) return SMS_ALREADY_SENT;
+            if (newbie.getExpirationInSeconds() < CODE_EXPIRATION) return SMS_ALREADY_SENT;
         }
 
         int code = smsService.sendSMS(newPhoneNumber, newNickname);
@@ -69,7 +71,7 @@ public class NewbiePlayerServiceImpl implements NewbiePlayerService {
         Newbie newbie = new Newbie();
         newbie.setId(phoneNumber);
         newbie.setCode(code);
-        newbie.setExpirationInSeconds(60L);
+        newbie.setExpirationInSeconds(CODE_EXPIRATION);
         newbieRepository.save(newbie);
     }
 
@@ -120,9 +122,9 @@ public class NewbiePlayerServiceImpl implements NewbiePlayerService {
         user.setEmailVerified(true);
         user.setRealmRoles(Arrays.asList("player"));
 
-        var respone = keycloak.realm("backdammon-realm").users().create(user);
-        System.out.println(respone.getStatus());
-        System.out.println(respone.getMetadata());
+        var response = keycloak.realm(keycloakConfig.getRealm()).users().create(user);
+        System.out.println(response.getStatus());
+        System.out.println(response.getMetadata());
 
     }
 
