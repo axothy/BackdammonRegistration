@@ -10,6 +10,7 @@ import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
+import ru.axothy.backdammon.registration.config.KeycloakConfig;
 import ru.axothy.backdammon.registration.model.Newbie;
 import ru.axothy.backdammon.registration.model.Player;
 import ru.axothy.backdammon.registration.repos.NewbieRepository;
@@ -21,30 +22,15 @@ import java.util.regex.Pattern;
 
 @Service
 public class NewbiePlayerServiceImpl implements NewbiePlayerService {
-    @Value("${keycloak.resource}")
-    private String keycloakResource;
-
-    @Value("${keycloak.credentials.secret.realm}")
-    private String keycloakCredentialsSecret;
-
-    @Value("${keycloak.realm}")
-    private String realm;
-
-    @Value("${keycloak.auth-server-url}")
-    private String keycloakUrl;
-
-    @Value("${admin.credentials.username}")
-    private String keycloakAdminUsername;
-
-    @Value("${admin.credentials.password}")
-    private String keycloakAdminPassword;
-
     private static final String NICKNAME_ALREADY_USED = "Данный никнейм уже зарегистрирован";
     private static final String PHONE_NUMBER_ALREADY_USED = "Данный номер телефона уже зарегистрирован";
     private static final String INVALID_NICKNAME = "Введите корректный никнейм (только латиница, 3-16 символов, без знаков)";
     private static final String INVALID_PHONE_NUMBER = "Введите корректный номер телефона";
     private static final String SMS_SENT_SUCCESSFULL = "СМС с кодом был отправлен на ваш номер";
     private static final String SMS_ALREADY_SENT = "СМС с кодом уже был отправлен";
+
+    @Autowired
+    private KeycloakConfig keycloakConfig;
 
     @Autowired
     private SMSService smsService;
@@ -57,6 +43,9 @@ public class NewbiePlayerServiceImpl implements NewbiePlayerService {
 
     @Autowired
     private NewbieRepository newbieRepository;
+
+    @Value("${keycloak.credentials.secret-realm}")
+    private String realmSecret;
 
     @Override
     public String sendSmsForNewbiePlayer(String newNickname, String newPhoneNumber) {
@@ -188,13 +177,13 @@ public class NewbiePlayerServiceImpl implements NewbiePlayerService {
     }
 
     private String getAdminToken() {
-        Keycloak keycloak = KeycloakBuilder.builder().serverUrl(keycloakUrl)
+        Keycloak keycloak = KeycloakBuilder.builder().serverUrl(keycloakConfig.getAuthServerUrl())
                 .grantType("password")
-                .realm(realm)
-                .clientId(keycloakResource)
-                .clientSecret(keycloakCredentialsSecret)
-                .username(keycloakAdminUsername)
-                .password(keycloakAdminPassword)
+                .realm(keycloakConfig.getRealm())
+                .clientId(keycloakConfig.getResource())
+                .clientSecret(realmSecret)
+                .username(keycloakConfig.getAdminCredentials().getUsername())
+                .password(keycloakConfig.getAdminCredentials().getPassword())
                 .build();
         return keycloak.tokenManager().getAccessTokenString();
     }

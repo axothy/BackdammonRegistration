@@ -29,12 +29,9 @@ dependencies {
 	implementation group: 'org.springframework.boot', name: 'spring-boot-starter-data-redis'
 	implementation group: 'redis.clients', name: 'jedis', version: '3.9.0'
 
-
-
-
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	implementation 'org.springframework.cloud:spring-cloud-starter-config'
-	compileOnly 'org.projectlombok:lombok'
+	compileOnly group: 'org.projectlombok', name: 'lombok', version: '1.18.16'
 	annotationProcessor 'org.projectlombok:lombok'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'org.springframework.security:spring-security-test'
@@ -47,10 +44,6 @@ dependencies {
 
 	implementation group: 'org.glassfish.jersey.containers', name: 'jersey-container-servlet-core', version: '3.1.2'
 	implementation group: 'org.glassfish.jersey.core', name: 'jersey-server', version: '3.1.2'
-
-
-
-
 }
 
 dependencyManagement {

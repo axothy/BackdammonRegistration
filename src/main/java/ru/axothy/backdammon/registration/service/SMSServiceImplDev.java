@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 @Service
 @ConditionalOnProperty(name = "sms.send.enabled", havingValue = "false")
 public class SMSServiceImplDev implements SMSService {
+    private static final int SMS_CODE_FOR_DEV = 1111;
 
     @Override
     public int sendSMS(String phoneNumber, String nickname) {
@@ -17,7 +18,7 @@ public class SMSServiceImplDev implements SMSService {
 
     @Override
     public int generateCode() {
-        return 1111;
+        return SMS_CODE_FOR_DEV;
     }
 
 }

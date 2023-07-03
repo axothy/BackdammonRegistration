@@ -1,37 +1,35 @@
 package ru.axothy.backdammon.registration.config;
 
+import lombok.Getter;
+import lombok.Setter;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.KeycloakBuilder;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
+@ConfigurationProperties(prefix = "keycloak")
+@Getter
+@Setter
 public class KeycloakConfig {
-    @Value("${keycloak.resource}")
-    private String keycloakResource;
+    private String resource;
+    private String authServerUrl;
+    private String credentialsSecret;
+    private String realm;
+    private String credentialsSecretRealm;
+    private AdminCredentials adminCredentials;
 
-    @Value("${keycloak.credentials.secret}")
-    private String keycloakCredentialsSecret;
-
-    @Value("${keycloak.auth-server-url}")
-    private String keycloakUrl;
-
-    @Value("${admin.credentials.username}")
-    private String keycloakAdminUsername;
-
-    @Value("${admin.credentials.password}")
-    private String keycloakAdminPassword;
 
     @Bean
     public Keycloak getKeycloak() {
-        return KeycloakBuilder.builder().serverUrl(keycloakUrl)
+        return KeycloakBuilder.builder().serverUrl(authServerUrl)
                 .grantType("password")
                 .realm("master")
-                .clientId(keycloakResource)
-                .clientSecret(keycloakCredentialsSecret)
-                .username(keycloakAdminUsername)
-                .password(keycloakAdminPassword)
+                .clientId(resource)
+                .clientSecret(credentialsSecret)
+                .username(adminCredentials.getUsername())
+                .password(adminCredentials.getPassword())
                 .build();
     }
 

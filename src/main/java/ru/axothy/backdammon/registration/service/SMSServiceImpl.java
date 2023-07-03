@@ -35,7 +35,7 @@ public class SMSServiceImpl implements SMSService {
         headers.setBasicAuth(smsUser, smsApiKey);
         HttpEntity request = new HttpEntity(headers);
 
-        String url = "https://email:api_key@gate.smsaero.ru/v2/sms/send?number=" + phoneNumber + "&text=" + smsText + "&sign=Нарды+от+Сани";
+        String url = "https://email:api_key@gate.smsaero.ru/v2/sms/send?number=" + phoneNumber + "&text=" + smsText + "&sign=SMS Aero";
         restTemplate.exchange(url, HttpMethod.GET, request, String.class);
 
         return code;
