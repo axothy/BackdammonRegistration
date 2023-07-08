@@ -21,6 +21,7 @@ public class KeycloakConfig {
     private String credentialsSecret;
 
     private String realm;
+
     private AdminCredentials adminCredentials;
 
 

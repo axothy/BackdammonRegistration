@@ -120,12 +120,10 @@ public class NewbiePlayerServiceImpl implements NewbiePlayerService {
         user.setUsername(username);
         user.setEnabled(true);
         user.setEmailVerified(true);
-        user.setRealmRoles(Arrays.asList("player"));
+        user.setRealmRoles(Arrays.asList("PLAYER"));
 
+        System.out.println(keycloakConfig.getRealm());
         var response = keycloak.realm(keycloakConfig.getRealm()).users().create(user);
-        System.out.println(response.getStatus());
-        System.out.println(response.getMetadata());
-
     }
 
     private boolean isNicknameValid(String nickname) {
